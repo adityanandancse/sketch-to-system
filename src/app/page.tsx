@@ -4,6 +4,9 @@ import Marquee from "@/components/sections/Marquee";
 import Works from "@/components/sections/Works";
 import Approach from "@/components/sections/Approach";
 import Flow from "@/components/sections/Flow";
+import Impact from "@/components/sections/Impact";
+import Contact from "@/components/sections/Contact";
+import Footer from "@/components/sections/Footer";
 
 export default function Home() {
   return (
@@ -16,10 +19,9 @@ export default function Home() {
 
       <Approach />
       <Flow />
-
-      <section id="impact" className="min-h-screen bg-paper text-ink px-10 py-32">
-        <p className="font-mono text-xs">06 / IMPACT — coming next</p>
-      </section>
+      <Impact />
+      <Contact />
+      <Footer />
     </main>
   );
 }

@@ -153,3 +153,49 @@ export const flow = {
     },
   ],
 };
+
+export type Metric = {
+  value: number;
+  suffix?: string;
+  label: string;
+  note: string;
+  draft: boolean;
+};
+
+export const impact = {
+  index: "06 / IMPACT",
+  heading: "Numbers from systems in daily use.",
+  // TODO(AB): replace with real figures, then set draft: false on each.
+  metrics: [
+    { value: 0, suffix: "+", label: "Production systems shipped", note: "Live and used daily", draft: true },
+    { value: 0, suffix: "+", label: "Workflow stages automated", note: "From intake to dispatch", draft: true },
+    { value: 0, suffix: "%", label: "Less manual data entry", note: "Measured against the old process", draft: true },
+    { value: 0, suffix: "", label: "Years building for the web", note: "Design and engineering", draft: true },
+  ] as Metric[],
+};
+
+export const contact = {
+  index: "07 / CONTACT",
+  lines: ["Got a system", "in mind?"],
+  email: "hello@example.com", // TODO(AB): real email
+  emailDraft: true,
+  reply: "I usually reply within a day.",
+  status: "Open for new projects",
+  socials: [
+    // TODO(AB): add real links; empty href entries are hidden
+    { label: "GitHub", href: "" },
+    { label: "LinkedIn", href: "" },
+    { label: "Instagram", href: "" },
+    { label: "X", href: "" },
+  ],
+};
+
+export const nav = [
+  { label: "Index", href: "#hero" },
+  { label: "About", href: "#about" },
+  { label: "Works", href: "#works" },
+  { label: "Approach", href: "#approach" },
+  { label: "Flow", href: "#flow" },
+  { label: "Impact", href: "#impact" },
+  { label: "Contact", href: "#contact" },
+];

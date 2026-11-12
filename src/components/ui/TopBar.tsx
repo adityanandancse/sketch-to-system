@@ -1,31 +1,17 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState } from "react";
+import { useISTClock } from "@/hooks/useISTClock";
 import RollText from "./RollText";
 
 const TIME_PLACEHOLDER = "--:--";
-
-const timeFormat = new Intl.DateTimeFormat("en-US", {
-  timeZone: "Asia/Kolkata",
-  hour: "numeric",
-  minute: "2-digit",
-  hour12: true,
-});
-
-function subscribe(onTick: () => void) {
-  const id = window.setInterval(onTick, 15_000);
-  return () => window.clearInterval(id);
-}
-
-const getTime = () => `${timeFormat.format(new Date())} (IST)`;
-// Server + hydration render the placeholder, so markup always matches.
-const getServerTime = () => TIME_PLACEHOLDER;
 
 const button =
   "group flex cursor-pointer items-center gap-2 font-mono text-xs tracking-[0.2em]";
 
 export default function TopBar() {
-  const time = useSyncExternalStore(subscribe, getTime, getServerTime);
+  const clock = useISTClock();
+  const time = clock === TIME_PLACEHOLDER ? clock : `${clock} (IST)`;
   const [soundOn, setSoundOn] = useState(false);
 
   return (

@@ -6,7 +6,7 @@
 - [x] 03 Fluid dye cursor (WebGL)
 - [x] 04 About + marquee
 - [x] 05 Works (pinned, WebGL transitions)
-- [ ] 06 Approach (01/02/03) + Flow (horizontal process)
+- [x] 06 Approach (01/02/03) + Flow (horizontal process)
 - [ ] 07 Impact / data section (real numbers)
 - [ ] 08 Contact + footer (giant email, IST clock, socials, status)
 - [ ] 09 Menu overlay (full-screen nav, RollText links, Lenis scrollTo)
@@ -34,6 +34,7 @@
 - [ ] Social links (GitHub, LinkedIn, Instagram, X)
 - [ ] Which projects get a public URL; name clients or keep anonymous
 - [ ] Remove "3D version in progress" caption once the avatar ships
+- [ ] Impact + contact are in draft mode (hidden in production) until real numbers, email and socials are set in site.ts
 
 ## Housekeeping
 - [ ] Move project off A:\ to a local SSD (Next.js slow-filesystem warning) or add a Defender exclusion
