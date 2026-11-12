@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { fontVars } from "@/lib/fonts";
 import SmoothScroll from "@/components/providers/SmoothScroll";
+import TopBar from "@/components/ui/TopBar";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -13,7 +14,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={fontVars}>
       <body>
-        <SmoothScroll>{children}</SmoothScroll>
+        <SmoothScroll>
+          <TopBar />
+          {children}
+        </SmoothScroll>
         <div className="grain" aria-hidden />
       </body>
     </html>

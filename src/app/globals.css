@@ -12,6 +12,18 @@
   --font-script: var(--font-script), cursive;
   --font-sans: var(--font-sans), sans-serif;
   --font-mono: var(--font-mono), monospace;
+
+  --animate-bob: bob 2s ease-in-out infinite;
+
+  @keyframes bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(6px);
+    }
+  }
 }
 
 @layer base {
@@ -36,6 +48,18 @@ html.lenis body {
 
 .lenis-stopped {
   overflow: hidden;
+}
+
+/* Hero intro: keep animated pieces hidden until GSAP has applied their
+   start states, so the final layout never flashes before the intro. */
+[data-intro="pending"] [data-intro-item] {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-intro="pending"] [data-intro-item] {
+    visibility: visible;
+  }
 }
 
 /* Film grain overlay */
