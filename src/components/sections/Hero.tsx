@@ -4,6 +4,15 @@ import { useRef, type CSSProperties } from "react";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
 import { useGSAP } from "@gsap/react";
+import dynamic from "next/dynamic";
+
+// Client-only: keeps three.js out of the server render and initial bundle.
+const FluidDye = dynamic(() => import("@/components/three/FluidDye"), {
+  ssr: false,
+});
+
+const DYE_OPACITY_PAPER = 0.9;
+const DYE_OPACITY_INK = 0.55;
 
 /* ---------- Sketch grid geometry (viewBox 1440 × 900) ---------- */
 
@@ -88,6 +97,8 @@ const title = "js-title block";
 
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
+  // Read by FluidDye every frame; driven by the scroll timeline below.
+  const dyeOpacity = useRef(DYE_OPACITY_PAPER);
 
   useGSAP(
     (_context, contextSafe) => {
@@ -112,6 +123,8 @@ export default function Hero() {
         stage.style.setProperty("--bg", mixBg(t));
         stage.style.setProperty("--fg", mixFg(t));
         stage.style.setProperty("--line", mixLine(t));
+        dyeOpacity.current =
+          DYE_OPACITY_PAPER + (DYE_OPACITY_INK - DYE_OPACITY_PAPER) * t;
         lineEls.forEach((el, i) => {
           const { sketch, straight } = GRID_LINES[i];
           el.setAttribute(
@@ -229,7 +242,7 @@ export default function Hero() {
       >
         {/* Layer A — sketch grid */}
         <svg
-          className="js-grid absolute inset-0 h-full w-full"
+          className="js-grid absolute inset-0 z-0 h-full w-full"
           viewBox={`0 0 ${W} ${H}`}
           preserveAspectRatio="none"
           fill="none"
@@ -257,6 +270,9 @@ export default function Hero() {
             <path key={i} className="js-mark" d={d} data-intro-item {...shape} />
           ))}
         </svg>
+
+        {/* Fluid dye — between the grid (z-0) and the title block (z-10) */}
+        <FluidDye className="z-[5]" opacity={dyeOpacity} />
 
         {/* Annotation labels: sketch text with a system twin */}
         {ANNOTATIONS.map((note) => (
