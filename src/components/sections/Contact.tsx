@@ -7,13 +7,18 @@ import { useGSAP } from "@gsap/react";
 import DraftBadge from "@/components/ui/DraftBadge";
 import RollText from "@/components/ui/RollText";
 import { showDraft } from "@/lib/draft";
-import { contact } from "@/content/site";
+import { contact, profile } from "@/content/site";
 
 const MAGNET_PX = 18;
 const COPIED_MS = 1600;
 
-// A draft email is shown in development only.
-const emailVisible = showDraft(contact.emailDraft);
+// A draft / example-placeholder email is shown in development only.
+const emailIsDraft =
+  contact.emailDraft || contact.email.endsWith("@example.com");
+const emailVisible = showDraft(emailIsDraft);
+// Same for the résumé link until the PDF exists.
+const resumeVisible = showDraft(profile.resumeDraft);
+const socials = contact.socials.filter((social) => social.href);
 
 export default function Contact() {
   const root = useRef<HTMLElement>(null);
@@ -134,7 +139,7 @@ export default function Contact() {
       <div className="js-contact-fade relative">
         {emailVisible ? (
           <>
-            <DraftBadge draft={contact.emailDraft} className="-top-8 left-0" />
+            <DraftBadge draft={emailIsDraft} className="-top-8 left-0" />
 
             <div className="flex flex-wrap items-end gap-x-8 gap-y-4">
               {/* Padded box the magnet listens on. */}
@@ -161,8 +166,40 @@ export default function Contact() {
           </>
         ) : (
           <p className="font-serif text-[clamp(1.5rem,3vw,3rem)] italic">
-            Contact details coming soon.
+            Reach me on LinkedIn or GitHub below.
           </p>
+        )}
+
+        {socials.length > 0 && (
+          <ul className="mt-10 flex flex-wrap gap-x-8 gap-y-3">
+            {socials.map((social) => (
+              <li key={social.label}>
+                <a
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.label}
+                  className="group inline-flex font-mono text-xs tracking-[0.2em] uppercase"
+                >
+                  <RollText text={`${social.label} ↗`} />
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {resumeVisible && (
+          <div className="relative mt-10 inline-block">
+            <DraftBadge draft={profile.resumeDraft} className="-top-3 -right-4 bg-ink" />
+            <a
+              href={profile.resumeUrl}
+              download
+              aria-label="Download resume"
+              className="group inline-flex border border-paper/40 px-5 py-3 font-mono text-xs tracking-[0.2em]"
+            >
+              <RollText text="DOWNLOAD RESUME ↓" />
+            </a>
+          </div>
         )}
       </div>
     </section>

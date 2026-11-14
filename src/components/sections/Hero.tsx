@@ -5,14 +5,16 @@ import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
 import { useGSAP } from "@gsap/react";
 import dynamic from "next/dynamic";
+import { profile } from "@/content/site";
 
 // Client-only: keeps three.js out of the server render and initial bundle.
 const FluidDye = dynamic(() => import("@/components/three/FluidDye"), {
   ssr: false,
 });
 
-const DYE_OPACITY_PAPER = 0.9;
-const DYE_OPACITY_INK = 0.55;
+// Calmer as ink on paper, stronger as a glow on ink.
+const DYE_OPACITY_PAPER = 0.55;
+const DYE_OPACITY_INK = 0.8;
 
 /* ---------- Sketch grid geometry (viewBox 1440 × 900) ---------- */
 
@@ -38,8 +40,10 @@ type GridLine = { sketch: Coords; straight: Coords };
 const toD = ([x1, y1, x2, y2]: Coords) =>
   `M${x1.toFixed(2)} ${y1.toFixed(2)}L${x2.toFixed(2)} ${y2.toFixed(2)}`;
 
-const COLS = Array.from({ length: 12 }, (_, i) => 60 + i * 120);
-const ROWS = Array.from({ length: 8 }, (_, i) => Math.round(50 + (i * 800) / 7));
+// 8 vertical + 6 horizontal lines. The outer verticals sit well inside the
+// edges so the margin annotation chips never land on one (at desktop widths).
+const COLS = Array.from({ length: 8 }, (_, i) => Math.round(180 + (i * 1080) / 7));
+const ROWS = Array.from({ length: 6 }, (_, i) => 75 + i * 150);
 
 const GRID_LINES: GridLine[] = [
   ...COLS.map<GridLine>((x) => ({
@@ -52,29 +56,37 @@ const GRID_LINES: GridLine[] = [
   })),
 ];
 
-const CIRCLES = [
-  { cx: COLS[3], cy: ROWS[4], r: 300 },
-  { cx: COLS[8], cy: ROWS[3], r: 380 },
-];
+// One large compass circle, partly off the right edge: it frames the name
+// rather than crossing it (centre 80% x, radius 45% of the height).
+const CIRCLE = { cx: W * 0.8, cy: H * 0.38, r: H * 0.45 };
 
+// All on the right / outer part of the stage, clear of the title block.
 const CROSSHAIRS = [
-  [COLS[2], ROWS[2]],
-  [COLS[9], ROWS[1]],
-  [COLS[4], ROWS[6]],
+  [COLS[5], ROWS[1]],
+  [COLS[7], ROWS[1]],
   [COLS[7], ROWS[4]],
+  [COLS[6], ROWS[5]],
 ].map(([x, y]) => `M${x - 10} ${y}H${x + 10}M${x} ${y - 10}V${y + 10}`);
+
+const LINE_OPACITY = 0.25;
+const MARK_OPACITY = 0.4;
 
 const TICKS = Array.from({ length: 61 }, (_, i) => {
   const x = i * 24;
   return `M${x} ${H}V${H - (i % 5 === 0 ? 14 : 7)}`;
 });
 
+// Margin chips, 24px from the edge, kept ≥48px clear of the title block and
+// eyebrow. "y 900" sits in the bottom-left margin, above "01 / INDEX".
 const ANNOTATIONS = [
-  { sketch: "fig. 01 — sketch", system: "fig. 01 — system", pos: "top-24 left-6 md:left-10" },
-  { sketch: "x 1440", system: "grid 12 col", pos: "top-24 right-6 md:right-10" },
-  { sketch: "y 900", system: "build 1.0", pos: "top-1/2 left-6 md:left-10" },
-  { sketch: "rev. 0", system: "rev. final", pos: "top-1/2 right-6 md:right-10" },
+  { sketch: "fig. 01 — sketch", system: "fig. 01 — system", pos: "top-[14%] left-6", right: false },
+  { sketch: "x 1440", system: "grid 12 col", pos: "top-[14%] right-6", right: true },
+  { sketch: "y 900", system: "build 1.0", pos: "bottom-[72px] left-6", right: false },
+  { sketch: "rev. 0", system: "rev. final", pos: "right-6 bottom-[72px] md:top-1/2 md:bottom-auto", right: true },
 ];
+
+// Chip: sits on the stage colour so grid lines never run through its text.
+const chip = { backgroundColor: "var(--bg)" } as const;
 
 const PAPER = "#F2EEE6";
 const INK = "#0B0B0C";
@@ -186,6 +198,12 @@ export default function Hero() {
           )
           .set(drawn, { clearProps: "strokeDasharray,strokeDashoffset" })
           .from(".js-mark", { autoAlpha: 0, duration: 0.4, stagger: 0.02 }, 1.6)
+          // Eyebrow fades up just before the title characters.
+          .from(
+            ".js-eyebrow",
+            { y: 20, autoAlpha: 0, duration: 0.7, ease: "power2.out" },
+            0.2,
+          )
           .from(
             split.chars,
             { yPercent: 110, duration: 1, stagger: 0.04, ease: "expo.out" },
@@ -236,95 +254,123 @@ export default function Hero() {
   return (
     <section id="hero" ref={root} className="relative h-[250vh]">
       <div
-        className="js-stage sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden"
+        className="js-stage sticky top-0 grid h-screen w-full grid-cols-12 items-center overflow-hidden px-6 md:px-10"
         style={stageVars}
         data-intro="pending"
       >
-        {/* Layer A — sketch grid */}
-        <svg
-          className="js-grid absolute inset-0 z-0 h-full w-full"
-          viewBox={`0 0 ${W} ${H}`}
-          preserveAspectRatio="none"
-          fill="none"
-          stroke="var(--line)"
-          strokeWidth={1}
-          aria-hidden
-        >
-          {GRID_LINES.map((line, i) => (
-            <path
-              key={i}
-              className="js-grid-line js-draw"
-              d={toD(line.sketch)}
-              data-intro-item
-              {...shape}
-            />
-          ))}
-          {CIRCLES.map((circle, i) => (
-            <circle key={i} className="js-draw" data-intro-item {...circle} {...shape} />
-          ))}
-          <path className="js-draw" d={`M0 ${H}L${W} 0`} data-intro-item {...shape} />
-          {CROSSHAIRS.map((d, i) => (
-            <path key={i} className="js-mark" d={d} data-intro-item {...shape} />
-          ))}
-          {TICKS.map((d, i) => (
-            <path key={i} className="js-mark" d={d} data-intro-item {...shape} />
-          ))}
-        </svg>
+        {/* Layer A — sketch grid. The wrapper carries the mask (grid fades out
+            behind the title and under the top bar) and stays unscaled; the
+            SVG inside is what the scroll timeline scales. */}
+        <div className="hero-grid-mask absolute inset-0 z-0" aria-hidden>
+          <svg
+            className="js-grid h-full w-full"
+            viewBox={`0 0 ${W} ${H}`}
+            preserveAspectRatio="none"
+            fill="none"
+            stroke="var(--line)"
+            strokeWidth={1}
+            strokeOpacity={LINE_OPACITY}
+          >
+            {GRID_LINES.map((line, i) => (
+              <path
+                key={i}
+                className="js-grid-line js-draw"
+                d={toD(line.sketch)}
+                data-intro-item
+                {...shape}
+              />
+            ))}
+            <circle className="js-draw" data-intro-item {...CIRCLE} {...shape} />
+            {CROSSHAIRS.map((d, i) => (
+              <path
+                key={i}
+                className="js-mark"
+                d={d}
+                strokeOpacity={MARK_OPACITY}
+                data-intro-item
+                {...shape}
+              />
+            ))}
+            {TICKS.map((d, i) => (
+              <path key={i} className="js-mark" d={d} data-intro-item {...shape} />
+            ))}
+          </svg>
+        </div>
 
         {/* Fluid dye — between the grid (z-0) and the title block (z-10) */}
         <FluidDye className="z-[5]" opacity={dyeOpacity} />
 
-        {/* Annotation labels: sketch text with a system twin */}
+        {/* Annotation chips in the outer margins: sketch text + system twin,
+            stacked in one grid cell so the chip fits the longer of the two. */}
         {ANNOTATIONS.map((note) => (
           <div
             key={note.sketch}
-            className={`js-mark absolute font-mono text-[10px] whitespace-nowrap uppercase ${note.pos}`}
-            style={{ color: "var(--line)" }}
+            className={`js-mark absolute z-[6] grid px-1.5 font-mono text-[10px] whitespace-nowrap uppercase ${note.right ? "justify-items-end" : ""} ${note.pos}`}
+            style={{ ...chip, color: "var(--line)" }}
             data-intro-item
             aria-hidden
           >
-            <span data-state="sketch">{note.sketch}</span>
-            <span
-              data-state="system"
-              className={`absolute top-0 opacity-0 ${note.pos.includes("right") ? "right-0" : "left-0"}`}
-            >
+            <span data-state="sketch" className="col-start-1 row-start-1">
+              {note.sketch}
+            </span>
+            <span data-state="system" className="col-start-1 row-start-1 opacity-0">
               {note.system}
             </span>
           </div>
         ))}
 
-        {/* Layer B — title block */}
-        <div className="js-title-block relative z-10 flex flex-col items-center px-6 text-center">
-          <h1 className="relative font-display text-[clamp(4rem,17vw,16rem)] leading-[0.85] uppercase">
+        {/* Layer B — title block: left-aligned, slightly below centre */}
+        <div className="js-title-block relative z-10 col-span-10 origin-left pt-[18vh]">
+          <p
+            className="js-eyebrow mb-6 font-mono text-[11px] tracking-[0.18em] uppercase md:text-xs"
+            style={{ color: "color-mix(in srgb, var(--fg) 70%, transparent)" }}
+            data-intro-item
+          >
+            {profile.eyebrow}
+          </p>
+          <h1 className="font-display text-[clamp(3.5rem,11.5vw,12rem)] leading-[0.9] uppercase">
             <span className={title} data-intro-item>
-              Sketch
+              {profile.firstName}
             </span>
-            <span
-              className="js-to absolute top-1/2 left-[58%] z-10 -translate-x-1/2 -translate-y-1/2 -rotate-6 px-[0.3em] py-[0.35em] font-script text-[clamp(2.5rem,7vw,7rem)] leading-none text-signal normal-case"
-              data-intro-item
-            >
-              to
-            </span>
-            <span className={title} data-intro-item>
-              System
+            {/* md+: last name indented, signature beside it on the same row.
+                Mobile: signature on its own line, right-aligned. */}
+            <span className="mt-[clamp(0.25rem,0.8vw,0.75rem)] block md:flex md:items-end md:pl-[8vw]">
+              <span className={title} data-intro-item>
+                {profile.lastName}
+              </span>
+              <span
+                className="js-to block -rotate-[4deg] px-[0.3em] py-[0.25em] text-right font-script text-[clamp(1.6rem,3.2vw,3.4rem)] leading-none whitespace-nowrap text-signal normal-case md:ml-6"
+                data-intro-item
+              >
+                {profile.signature}
+              </span>
             </span>
           </h1>
           <p
-            className="js-fade-up mt-8 font-serif text-[clamp(1.1rem,1.6vw,1.6rem)] italic"
+            className="js-fade-up mt-8 max-w-xl font-serif text-[clamp(1.1rem,1.6vw,1.6rem)] italic md:ml-[8vw]"
             data-intro-item
           >
-            Designer &amp; full-stack engineer — from first line to production.
+            {profile.tagline}
           </p>
         </div>
 
+        {/* Reserved for the future avatar — intentionally empty and unstyled. */}
+        <div
+          data-slot="avatar"
+          className="pointer-events-none absolute right-[6vw] bottom-0 hidden h-[78vh] w-[32vw] md:block"
+          aria-hidden
+        />
+
         <span
-          className="js-fade-up absolute bottom-6 left-6 font-mono text-[11px] md:left-10"
+          className="js-fade-up absolute bottom-6 left-6 z-[6] px-1.5 font-mono text-[11px]"
+          style={chip}
           data-intro-item
         >
           01 / INDEX
         </span>
         <span
-          className="js-fade-up absolute right-6 bottom-6 font-mono text-[11px] md:right-10"
+          className="js-fade-up absolute right-6 bottom-6 z-[6] px-1.5 font-mono text-[11px]"
+          style={chip}
           data-intro-item
         >
           <span className="js-scroll-hint block">

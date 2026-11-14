@@ -11,6 +11,12 @@ import { impact } from "@/content/site";
 const metrics = impact.metrics.filter((metric) => showDraft(metric.draft));
 
 export default function Impact() {
+  // Nothing to show (production with every metric still a draft).
+  if (!metrics.length) return null;
+  return <ImpactSection />;
+}
+
+function ImpactSection() {
   const root = useRef<HTMLElement>(null);
 
   useGSAP(
@@ -45,8 +51,6 @@ export default function Impact() {
     },
     { scope: root },
   );
-
-  if (!metrics.length) return null;
 
   return (
     <section
@@ -83,6 +87,11 @@ export default function Impact() {
                 </span>
               </dt>
               <dd className="font-display text-[clamp(4rem,9vw,9rem)] leading-none">
+                {/* The prefix ("~") sits outside the counted span, so it stays
+                    put while the number runs. */}
+                {metric.prefix && (
+                  <span className="text-signal">{metric.prefix}</span>
+                )}
                 {/* Fixed-width digits so the count-up never shifts layout. */}
                 <span
                   className="js-count inline-block tabular-nums"

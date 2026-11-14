@@ -27,9 +27,13 @@ const DYE_RES_COARSE = 256;
 const PRESSURE_ITERATIONS = 20;
 const PRESSURE_CLEAR = 0.8;
 const VELOCITY_DISSIPATION = 0.98; // per frame @ 60fps
-const DYE_DISSIPATION = 0.975; // per frame @ 60fps
-const SPLAT_RADIUS = 0.0025;
+const DYE_DISSIPATION = 0.955; // per frame @ 60fps — trails fade within ~1.5s of stillness
+const POINTER_RADIUS = 0.0016;
+const INTRO_RADIUS = 0.0018;
 const SPLAT_FORCE = 6000;
+const POINTER_FORCE_SCALE = 0.8;
+// Dye never becomes fully opaque, so it cannot completely cover text.
+const MAX_ALPHA = 0.75;
 const MAX_DT = 1 / 30;
 const MAX_PIXEL_RATIO = 1.5;
 
@@ -40,8 +44,10 @@ const DYE_COLOR = [0.886, 0.137, 0.102] as const;
 const DYE_STRENGTH = 0.25;
 const DYE_VARIATION = 0.08;
 
-const INTRO_DURATION = 2.6; // seconds
-const DEFAULT_OPACITY = 0.9;
+const INTRO_DURATION = 2.0; // seconds
+// After the intro, pointer splats this close to the viewport top (top bar) are ignored.
+const POINTER_DEAD_ZONE_TOP = 100; // px
+const DEFAULT_OPACITY = 0.55;
 
 /* ---------- Shaders ---------- */
 
@@ -169,6 +175,7 @@ const displayShader = /* glsl */ `
   uniform vec2 uResolution;
   uniform float uTime;
   uniform float uOpacity;
+  uniform float uMaxAlpha;
 
   float hash(vec2 p) {
     return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
@@ -182,7 +189,9 @@ const displayShader = /* glsl */ `
     float intensity = clamp(peak, 0.0, 1.0);
     vec3 color = d / max(peak, 1e-4);
     color += (hash(vUv * uResolution + uTime) - 0.5) * 0.03;
-    gl_FragColor = vec4(color, intensity * uOpacity);
+    // Fade the dye out near the top and bottom edges of the stage.
+    float edgeFade = smoothstep(0.0, 0.12, vUv.y) * (1.0 - smoothstep(0.82, 1.0, vUv.y));
+    gl_FragColor = vec4(color, min(intensity * uOpacity, uMaxAlpha) * edgeFade);
   }
 `;
 
@@ -325,7 +334,7 @@ export default function FluidDye({
       aspectRatio: { value: 1 },
       color: { value: new Vector3() },
       point: { value: new Vector2() },
-      radius: { value: SPLAT_RADIUS },
+      radius: { value: POINTER_RADIUS },
     });
     const advectionMat = makeMaterial(advectionShader, {
       uVelocity: { value: null },
@@ -353,6 +362,7 @@ export default function FluidDye({
       uResolution: { value: new Vector2() },
       uTime: { value: 0 },
       uOpacity: { value: DEFAULT_OPACITY },
+      uMaxAlpha: { value: MAX_ALPHA },
     });
     const simMaterials = [
       splatMat,
@@ -418,17 +428,24 @@ export default function FluidDye({
     };
 
     /* Splatting */
-    const splat = (x: number, y: number, dx: number, dy: number) => {
+    const splat = (
+      x: number,
+      y: number,
+      dx: number,
+      dy: number,
+      radius: number,
+      forceScale = 1,
+    ) => {
       if (!velocity || !dye) return;
 
       // Aspect-correct the pointer delta, then scale to a force.
-      const fx = (aspect < 1 ? dx * aspect : dx) * SPLAT_FORCE;
-      const fy = (aspect > 1 ? dy / aspect : dy) * SPLAT_FORCE;
+      const fx = (aspect < 1 ? dx * aspect : dx) * SPLAT_FORCE * forceScale;
+      const fy = (aspect > 1 ? dy / aspect : dy) * SPLAT_FORCE * forceScale;
 
       splatMat.uniforms.aspectRatio.value = aspect;
       splatMat.uniforms.point.value.set(x, y);
       splatMat.uniforms.radius.value =
-        aspect > 1 ? SPLAT_RADIUS * aspect : SPLAT_RADIUS;
+        aspect > 1 ? radius * aspect : radius;
 
       splatMat.uniforms.uTarget.value = velocity.read.texture;
       splatMat.uniforms.color.value.set(fx, fy, 0);
@@ -449,8 +466,13 @@ export default function FluidDye({
 
     /* Pointer input (pointer events cover mouse, pen and touch) */
     const pointer = { x: 0, y: 0, px: 0, py: 0, inside: false, moved: false };
+    const intro = { started: false, done: false, px: 0, py: 0 };
 
     const onPointerMove = (event: PointerEvent) => {
+      if (intro.done && event.clientY < POINTER_DEAD_ZONE_TOP) {
+        pointer.inside = false; // re-entry starts with no delta
+        return;
+      }
       const rect = canvas.getBoundingClientRect();
       const x = (event.clientX - rect.left) / rect.width;
       const y = 1 - (event.clientY - rect.top) / rect.height;
@@ -471,7 +493,6 @@ export default function FluidDye({
     };
 
     /* Intro virtual pointer */
-    const intro = { started: false, done: false, px: 0, py: 0 };
     const introDelay = startDelay / 1000;
     let clock = 0; // seconds of simulated (visible) time
 
@@ -485,8 +506,9 @@ export default function FluidDye({
         return;
       }
 
-      const x = 0.5 + 0.32 * Math.sin(t * 1.7);
-      const y = 0.5 + 0.18 * Math.sin(t * 2.3 + 0.6);
+      // A single left-to-right brush stroke; never enters the top 25%.
+      const x = 0.15 + 0.7 * (t / INTRO_DURATION);
+      const y = 0.62 + 0.08 * Math.sin(t * 4.0);
       if (!intro.started) {
         intro.started = true;
         intro.px = x;
@@ -495,7 +517,7 @@ export default function FluidDye({
       }
       dot.style.left = `${x * 100}%`;
       dot.style.top = `${(1 - y) * 100}%`;
-      splat(x, y, x - intro.px, y - intro.py);
+      splat(x, y, x - intro.px, y - intro.py, INTRO_RADIUS);
       intro.px = x;
       intro.py = y;
     };
@@ -554,7 +576,14 @@ export default function FluidDye({
       stepIntro();
       if (pointer.moved) {
         pointer.moved = false;
-        splat(pointer.x, pointer.y, pointer.x - pointer.px, pointer.y - pointer.py);
+        splat(
+          pointer.x,
+          pointer.y,
+          pointer.x - pointer.px,
+          pointer.y - pointer.py,
+          POINTER_RADIUS,
+          POINTER_FORCE_SCALE,
+        );
         pointer.px = pointer.x;
         pointer.py = pointer.y;
       }

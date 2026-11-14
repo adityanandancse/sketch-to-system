@@ -14,6 +14,7 @@ import {
   PlaneGeometry,
   Scene,
   ShaderMaterial,
+  SRGBColorSpace,
   Vector2,
   WebGLRenderer,
   type Texture,
@@ -104,8 +105,11 @@ const fragmentShader = /* glsl */ `
     vec3 signal = pow(vec3(0.886, 0.137, 0.102), vec3(2.2));
     color += signal * pow(edge, 8.0) * 0.9 * (uProgress * (1.0 - uProgress) * 4.0);
 
-    color += (hash(uv * uRes + fract(uTime) * 100.0) - 0.5) * uGrain;
-    color *= mix(0.86, 1.0, smoothstep(0.85, 0.35, length(uv - 0.5)));
+    // Grain and vignette belong to the transition only: at rest (progress 0)
+    // the cover is the untouched texture, at full brightness.
+    float moving = smoothstep(0.0, 0.15, uProgress) * smoothstep(1.0, 0.85, uProgress);
+    color += (hash(uv * uRes + fract(uTime) * 100.0) - 0.5) * uGrain * moving;
+    color *= mix(1.0, mix(0.86, 1.0, smoothstep(0.85, 0.35, length(uv - 0.5))), moving);
 
     gl_FragColor = vec4(color, 1.0);
     #include <colorspace_fragment>
@@ -183,6 +187,8 @@ export default function WorkCanvas({
     }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_PIXEL_RATIO));
     renderer.setClearColor(0x000000, 0);
+    // Textures are sRGB and so is the output: decoded once, encoded once.
+    renderer.outputColorSpace = SRGBColorSpace;
 
     const scene = new Scene();
     const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);

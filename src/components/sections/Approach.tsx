@@ -108,7 +108,7 @@ export default function Approach() {
         <span className="h-px flex-1 bg-ink/20" aria-hidden />
       </div>
 
-      <h2 className="mt-16 font-display text-[clamp(3rem,9vw,10rem)] leading-[0.85] uppercase md:mt-24">
+      <h2 className="mt-16 font-display text-[clamp(3rem,9vw,10rem)] leading-[0.93] uppercase md:mt-24">
         {approach.heading.map((line, i) => (
           <span
             key={line}

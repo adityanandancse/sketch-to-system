@@ -5,9 +5,9 @@ import TopBar from "@/components/ui/TopBar";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Aditya Nandan — Sketch to System",
+  title: "Aditya Nandan — Full-Stack Software Engineer",
   description:
-    "Designer and full-stack engineer building systems, apps and brands from first sketch to production.",
+    "Full-stack software engineer building production systems — ERP, B2B platforms and apps used daily. React, TypeScript, PostgreSQL, Cloudflare.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

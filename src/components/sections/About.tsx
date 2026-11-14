@@ -173,13 +173,16 @@ export default function About() {
             {/* Plain <img>: static export, images are unoptimized anyway. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/images/avatar.png"
+              src="/images/portrait.svg"
               alt="Illustrated portrait of Aditya Nandan"
+              width={1122}
+              height={1402}
+              loading="lazy"
               className="js-portrait-img h-full w-full object-contain"
             />
           </div>
           <figcaption className="mt-3 font-mono text-[10px] text-graphite uppercase">
-            fig. 02 — the author (sketch). 3D version in progress.
+            fig. 02 — the author.
           </figcaption>
         </figure>
 

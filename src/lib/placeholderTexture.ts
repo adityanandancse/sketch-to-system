@@ -80,16 +80,17 @@ async function ensureFonts() {
 }
 
 /**
- * Loads a work image as a texture; if it is missing (404) or fails to decode,
- * returns a generated placeholder texture instead.
+ * Loads a work image as a texture; if the work has no image, or it is missing
+ * (404) or fails to decode, returns a generated placeholder texture instead.
  */
 export async function loadWorkTexture(
-  url: string,
+  url: string | undefined,
   no: string,
   title: string,
 ): Promise<Texture> {
   let texture: Texture;
   try {
+    if (!url) throw new Error("no image");
     texture = await new TextureLoader().loadAsync(url);
   } catch {
     await ensureFonts();

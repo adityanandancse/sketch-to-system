@@ -6,14 +6,11 @@ import { useGSAP } from "@gsap/react";
 import { useLenis } from "@/components/providers/LenisContext";
 import { marquee } from "@/content/site";
 
-// Each group repeats the item set; the track holds two identical groups, so
-// shifting it by -50% loops seamlessly. 2 × 4 sets stays wider than twice the
-// viewport up to 4K.
-const SETS_PER_GROUP = 4;
-const LOOP_SECONDS = 30;
-const SYMBOLS = new Set(["→", "✳"]);
-
-const groupItems = Array.from({ length: SETS_PER_GROUP }, () => marquee).flat();
+// The track holds two identical groups, so shifting it by -50% loops
+// seamlessly. One pass of the tech stack is already several viewports wide.
+// Sized to the group width so the on-screen speed stays ~150px/s at 1440.
+const LOOP_SECONDS = 67;
+const SEPARATOR = "✱";
 
 export default function Marquee() {
   const root = useRef<HTMLDivElement>(null);
@@ -68,17 +65,23 @@ export default function Marquee() {
   return (
     <div
       ref={root}
-      aria-hidden
       className="overflow-hidden border-y border-ink bg-signal py-6 text-ink md:py-10"
     >
-      <div className="js-track flex w-max font-display text-[clamp(3rem,9vw,8rem)] leading-none whitespace-nowrap uppercase will-change-transform">
+      <p className="sr-only">
+        {marquee.label}: {marquee.items.join(", ")}
+      </p>
+      <div
+        aria-hidden="true"
+        className="js-track flex w-max font-display text-[clamp(3rem,9vw,8rem)] leading-none whitespace-nowrap uppercase will-change-transform"
+      >
         {[0, 1].map((group) => (
           <div key={group} className="flex shrink-0 items-center gap-10 pr-10">
-            {groupItems.map((item, i) => (
-              <span key={i} className={SYMBOLS.has(item) ? "font-sans" : undefined}>
-                {item}
-              </span>
-            ))}
+            {marquee.items.flatMap((item) => [
+              <span key={item}>{item}</span>,
+              <span key={`${item}-sep`} className="font-sans" aria-hidden="true">
+                {SEPARATOR}
+              </span>,
+            ])}
           </div>
         ))}
       </div>

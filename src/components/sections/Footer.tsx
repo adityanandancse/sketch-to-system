@@ -5,7 +5,7 @@ import { useLenis } from "@/components/providers/LenisContext";
 import RollText from "@/components/ui/RollText";
 import { useISTClock } from "@/hooks/useISTClock";
 import { showDraft } from "@/lib/draft";
-import { contact, impact, nav } from "@/content/site";
+import { contact, impact, nav, profile } from "@/content/site";
 
 // The Impact section is not rendered when every metric is a hidden draft, so
 // don't link to it then.
@@ -88,7 +88,7 @@ export default function Footer() {
           </ul>
         </Column>
 
-        <Column title="Social">
+        <Column title="Profiles">
           {socials.length ? (
             <ul className="space-y-2">
               {socials.map((social) => (
@@ -96,7 +96,7 @@ export default function Footer() {
                   <a
                     href={social.href}
                     target="_blank"
-                    rel="noopener"
+                    rel="noopener noreferrer"
                     aria-label={social.label}
                     className="group inline-flex font-mono text-xs uppercase"
                   >
@@ -125,7 +125,7 @@ export default function Footer() {
                 aria-hidden
               />
             </span>
-            {contact.status}
+            {profile.status}
           </p>
         </Column>
       </div>

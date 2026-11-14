@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import { useISTClock } from "@/hooks/useISTClock";
+import { showDraft } from "@/lib/draft";
+import { profile } from "@/content/site";
 import RollText from "./RollText";
 
 const TIME_PLACEHOLDER = "--:--";
+const resumeVisible = showDraft(profile.resumeDraft);
 
 const button =
   "group flex cursor-pointer items-center gap-2 font-mono text-xs tracking-[0.2em]";
@@ -24,6 +27,19 @@ export default function TopBar() {
       </p>
 
       <div className="pointer-events-auto flex items-center gap-6 md:gap-8">
+        {/* Hidden in production until the PDF exists; sm+ only for space. */}
+        {resumeVisible && (
+          <a
+            href={profile.resumeUrl}
+            target="_blank"
+            rel="noopener"
+            aria-label="Resume"
+            className="group hidden font-mono text-xs tracking-[0.2em] sm:inline-flex"
+          >
+            <RollText text="RESUME ↗" />
+          </a>
+        )}
+
         {/* Local state only — no audio wired up yet. */}
         <button
           type="button"
