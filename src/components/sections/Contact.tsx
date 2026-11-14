@@ -190,10 +190,9 @@ export default function Contact() {
 
         {resumeVisible && (
           <div className="relative mt-10 inline-block">
-            <DraftBadge draft={profile.resumeDraft} className="-top-3 -right-4 bg-ink" />
             <a
               href={profile.resumeUrl}
-              download
+              download="Aditya-Nandan-Resume.pdf"
               aria-label="Download resume"
               className="group inline-flex border border-paper/40 px-5 py-3 font-mono text-xs tracking-[0.2em]"
             >

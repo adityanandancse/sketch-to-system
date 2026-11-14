@@ -1,5 +1,13 @@
 // Site copy lives here so it can be edited in one place.
 
+export const site = {
+  /** Production origin, no trailing slash — for canonical / OG URLs. */
+  url: "https://aditya.aditeraction.com",
+};
+
+/** Launch flags — controls stay hidden until their step ships (08 menu, 12 sound). */
+export const features = { menu: false, sound: false };
+
 export const profile = {
   name: "Aditya Nandan",
   firstName: "Aditya",
@@ -8,8 +16,8 @@ export const profile = {
   eyebrow: "Full-Stack Software Engineer · SDE / FDE · Noida, India",
   signature: "Sketch to System",
   tagline: "From first sketch to production systems.",
-  resumeUrl: "/resume/Aditya-Nandan-Resume.pdf", // TODO(AB): add the PDF to public/resume/
-  resumeDraft: true,
+  resumeUrl: "/resume/Aditya-Nandan-Resume.pdf",
+  resumeDraft: false,
   status: "Open to SDE · FDE · Founder's Office roles",
 };
 
@@ -128,7 +136,7 @@ export const works: Work[] = [
     no: "01",
     title: "Operations Platform",
     kind: "Enterprise system",
-    year: "Dec 2024 – Present",
+    year: "Jun 2026 – Present",
     summary:
       "An end-to-end ERP running a two-plant textile business — stock inward, order punch, approvals, cutting, inter-plant shipping, delivery challans and a per-garment retail production line — used daily by 150+ people across Delhi and Noida.",
     role: "Sole engineer — requirements gathered on the shop floor, data model, Postgres RPCs, UI and releases.",
@@ -204,7 +212,7 @@ export const works: Work[] = [
     no: "02",
     title: "Private B2B Catalogue",
     kind: "B2B platform",
-    year: "Dec 2024 – Present",
+    year: "Jul – Sep 2026",
     summary:
       "A private B2B fabric catalogue for wholesale buyers — live stock by bundle and cut length, online ordering and instant proforma invoices — wired directly to the ERP so stock is never updated by hand.",
     role: "Sole engineer and designer — product, UI/UX, graphics, web + iOS app, edge workers and release.",
@@ -266,13 +274,14 @@ export const works: Work[] = [
     imageAlt:
       "Sketch of buyers asking for stock by phone and WhatsApp, crossed out, beside the Brixon app showing live bundles and cut lengths, a proforma invoice and a back-in-stock alert.",
     url: "https://app.brixonitaly.com",
+    status: "Shipped · live on web and App Store",
     appStore: { label: "App Store", href: "https://apps.apple.com/us/app/brixon/id6762793013" },
   },
   {
     no: "03",
     title: "Measurement App",
     kind: "AB Measure — bespoke measurement system",
-    year: "Jun – Aug 2026",
+    year: "Aug – Oct 2026",
     summary:
       "A bespoke measurement system for a couture label — garment-ready measurement sheets, mandatory reference photos and voice notes, captured on a phone at the client's side and printed straight onto the production job card.",
     role: "Sole engineer and designer — measurement schema with the master tailors, mobile-first UI, PDF cutting sheets, Android build and ERP integration.",
@@ -407,7 +416,7 @@ export const works: Work[] = [
     org: "Aditeraction",
     title: "Swatch Scanner",
     kind: "Mobile web app · Capture pipeline",
-    year: "Aug – Sep 2026",
+    year: "Jul – Aug 2026",
     draft: false,
     summary:
       "A capture-and-catalogue tool for physical samples — photograph a swatch, OCR reads the article number off its label, and the image is saved against that article; works one at a time or in bulk.",
@@ -446,7 +455,7 @@ export const works: Work[] = [
       "Onboarding new inventory batches in minutes instead of hours",
     ],
     role: "Sole engineer and designer — capture flow, detection with manual fallback, storage model, bulk upload and deployment.",
-    stack: ["React 19", "TypeScript", "Vite", "Tailwind CSS", "Cloudflare Workers", "Bun"],
+    stack: ["React 19", "TypeScript", "Vite", "Tailwind CSS", "Claude API (OCR)", "Cloudflare Workers", "Bun"],
     image: "/images/works/05-swatch-scanner.webp",
     imageAlt:
       "Sketch of the capture, OCR and fallback flow beside the Swatch Scanner camera reading an article number off a swatch label, and a bulk upload grid flagging two images to check.",
@@ -457,7 +466,7 @@ export const works: Work[] = [
     org: "Aditeraction",
     title: "Encrypted QR",
     kind: "Open-source fork · Extended",
-    year: "Oct – Dec 2025",
+    year: "Sep – Oct 2025",
     draft: false,
     summary:
       "Password-protected QR codes — encrypt a message into a QR that only someone with the password can read. An open-source project I forked and redesigned end to end for a cleaner, faster encrypt → share → decrypt experience.",
@@ -564,7 +573,7 @@ export const experience = {
         { label: "Edge & infra", items: ["Cloudflare Workers", "Bun", "Git & GitHub"] },
         { label: "Mobile", items: ["Capacitor (iOS + Android)", "App Store release"] },
         { label: "Commerce", items: ["Shopify OS 2.0", "Liquid", "Shopify CLI", "Google Tag Manager"] },
-        { label: "Documents & devices", items: ["jsPDF", "html2canvas", "ExcelJS", "QR / barcode scanning", "TSPL thermal label printing", "OCR"] },
+        { label: "Documents & devices", items: ["jsPDF", "html2canvas", "ExcelJS", "QR / barcode scanning", "TSPL thermal label printing", "OCR (Claude API)"] },
       ],
       draft: false,
     },

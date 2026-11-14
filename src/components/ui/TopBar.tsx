@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useISTClock } from "@/hooks/useISTClock";
 import { showDraft } from "@/lib/draft";
-import { profile } from "@/content/site";
+import { features, profile } from "@/content/site";
 import RollText from "./RollText";
 
 const TIME_PLACEHOLDER = "--:--";
@@ -27,40 +27,43 @@ export default function TopBar() {
       </p>
 
       <div className="pointer-events-auto flex items-center gap-6 md:gap-8">
-        {/* Hidden in production until the PDF exists; sm+ only for space. */}
         {resumeVisible && (
           <a
             href={profile.resumeUrl}
             target="_blank"
-            rel="noopener"
+            rel="noopener noreferrer"
             aria-label="Resume"
-            className="group hidden font-mono text-xs tracking-[0.2em] sm:inline-flex"
+            className="group inline-flex font-mono text-[11px] tracking-[0.15em] sm:text-xs sm:tracking-[0.2em]"
           >
             <RollText text="RESUME ↗" />
           </a>
         )}
 
-        {/* Local state only — no audio wired up yet. */}
-        <button
-          type="button"
-          className={button}
-          aria-label="Sound"
-          aria-pressed={soundOn}
-          onClick={() => setSoundOn((on) => !on)}
-        >
-          <RollText text="SOUND" />
-          <span className="text-[10px] opacity-60">{soundOn ? "ON" : "OFF"}</span>
-        </button>
+        {/* Local state only — no audio wired up yet (step 12). */}
+        {features.sound && (
+          <button
+            type="button"
+            className={button}
+            aria-label="Sound"
+            aria-pressed={soundOn}
+            onClick={() => setSoundOn((on) => !on)}
+          >
+            <RollText text="SOUND" />
+            <span className="text-[10px] opacity-60">{soundOn ? "ON" : "OFF"}</span>
+          </button>
+        )}
 
-        {/* No-op for now. */}
-        <button
-          type="button"
-          className={button}
-          aria-label="Menu"
-          aria-expanded={false}
-        >
-          <RollText text="MENU" />
-        </button>
+        {/* No-op until the menu overlay is built (step 08). */}
+        {features.menu && (
+          <button
+            type="button"
+            className={button}
+            aria-label="Menu"
+            aria-expanded={false}
+          >
+            <RollText text="MENU" />
+          </button>
+        )}
       </div>
     </header>
   );

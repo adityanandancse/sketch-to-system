@@ -15,10 +15,10 @@
 - [ ] 12 Sound
 - [ ] 13 Preloader + intro sequencing
 - [ ] 14 3D avatar
-- [ ] 15 SEO + OG + icons + sitemap
+- [x] 15 SEO + OG + icons + sitemap
 - [ ] 16 Performance & accessibility pass (Lighthouse 90+ all categories, keyboard nav, focus states, contrast)
 - [ ] 17 Mobile pass
-- [ ] 18 Cloudflare static-assets config
+- [x] 18 Cloudflare static-assets config (Workers assets-only via wrangler.jsonc; deploy target: aditya.aditeraction.com; `bun run deploy`)
 
 ## Assets needed
 - [x] Vector portrait (public/images/portrait.svg)
@@ -27,17 +27,17 @@
 - [ ] Compress GLB (gltf-transform, Draco + WebP, target < 3 MB) → public/models/avatar.glb
 - [ ] Work screenshots 01–06 at 1600×1000 WebP → public/images/works/
 - [ ] Sound files (ambient loop + UI tick) → public/audio/
-- [ ] OG image (1200×630)
+- [x] OG image (1200×630)
 
 ## Content to review / decide
 - [ ] Review all copy in src/content/site.ts (about, works)
 - [ ] Real impact numbers for the data section
-- [ ] Contact email + domain name
+- [x] Contact email + domain name
 - [ ] LinkedIn, LeetCode, X URLs
 - [ ] Which projects get a public URL; name clients or keep anonymous
 - [ ] Remove "3D version in progress" caption once the avatar ships
 - [ ] Impact + contact are in draft mode (hidden in production) until real numbers, email and socials are set in site.ts
-- [ ] Resume PDF → public/resume/Aditya-Nandan-Resume.pdf
+- [x] Resume PDF → public/resume/Aditya-Nandan-Resume.pdf
 - [ ] Internship bullet points (what you built + outcome)
 - [ ] Architecture diagrams for each case study
 - [ ] Resume + LinkedIn: GOV title must read "Web Developer" (match offer letter); Aditeraction as "Founder — ownership, team-operated"
